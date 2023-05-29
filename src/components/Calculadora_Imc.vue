@@ -18,7 +18,7 @@
         <br>
         <label v-if="aviso">{{ aviso }}</label>
         <br>
-        <img src="../assets/obesidade.jpg" v-if="imagem==1">
+        <img :src= imagem :class="{ 'imagem-redimensionada': imagem }"  v-if="imagem">
       </div>
     </form>
   </div>
@@ -36,7 +36,7 @@ export default defineComponent({
       imc: null as number | null,
       mensagem: "" as string,
       aviso: "" as string,
-      imagem:0 ,
+      imagem:"" ,
     };
   },
   methods: {
@@ -49,20 +49,33 @@ export default defineComponent({
         this.aviso = `É importante levar em consideração que o peso 
           não necessariamente significa que a pessoa é obesa. 
           Ou seja, depende da composição corporal.`
-        if (imc < 18.5) {
+        if (imc < 18.5 ) {
           this.mensagem = `Possui um IMC de ${this.imc}: Abaixo do Peso.`;
-          this.imagem = 1;
+          this.imagem = require('@/assets/abaixo do peso.jpg');
         } else if (imc >= 18.6 && imc <= 24.9) {
+          this.mensagem = `Possui um IMC de ${this.imc}:peso normal.`;
+          this.imagem = require('@/assets/peso normal.jpg');
+        }
+          else if (imc >= 25 && imc <= 29.9) {
           this.mensagem = `Possui um IMC de ${this.imc}: Levemente acima do Peso.`;
+          this.imagem = require('@/assets/levemente acima do peso.jpg');
         } else if (imc >= 30 && imc <= 34.9) {
           this.mensagem = `Possui um IMC de ${this.imc}: Obesidade grau I.`;
+          this.imagem = require('@/assets/obesidade grau 1.jpg');
         } else if (imc >= 35 && imc <= 39.9) {
           this.mensagem = `Possui um IMC de ${this.imc}: Obesidade grau II.`;
+          this.imagem = require('@/assets/obesidade grau 2.jpg');
         } else if (imc >= 40) {
           this.mensagem = `Possui um IMC de ${this.imc}: Obesidade grau III.`;
+          this.imagem = require('@/assets/obesidade grau 3.jpg');
         }
       }
     },
   }
 });
 </script>
+<style>
+.imagem-redimensionada {
+  max-width: 400px;
+  max-height: 400px;
+}</style>
