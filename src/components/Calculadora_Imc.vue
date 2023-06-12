@@ -1,26 +1,46 @@
 <template>
-  <div>
-    <h1>Calculadora de IMC</h1>
+  <div :class="{ noturno: modoNoturno }" class="raiz">
+
+    <div class="div_modo">
+      <button class="botao_noturno" @click="ligarModoNoturno">
+        <img class="imagem_modo" :src="modoNoturno ? imagemNoturna : imagemDiurna" alt="Botão de alternar modo">
+      </button>
+    </div>
+
+    <div class="div_titulo">
+      <h1 class="titulo_calculadora">Calculadora de IMC</h1>
+    </div>
+
+    <img class="img_capa" src="../assets/calculo_imc.png" alt="Diferentes tipos de IMC">
+
     <form @submit.prevent="calcular">
+
       <div>
-        <label for="peso">Peso (kg):</label>
-        <input type="number" id="peso" v-model="peso" step="0.01" required>
+        <label class="label_calculo" for="peso">Peso (kg): </label>
+        <input type="number" id="peso" placeholder="70" v-model="peso" step="0.5" required>
       </div>
+
       <div>
-        <label for="altura">Altura (m):</label>
-        <input type="number" id="altura" v-model="altura" step="0.01" required>
+        <label class="label_calculo" for="altura">Altura (m): </label>
+        <input type="number" id="altura" placeholder="1.75" v-model="altura" step="0.01" required>
       </div>
-      <div>
-        <button type="submit">Calcular</button>
+
+      <div class="aviso">
+        <p>É importante levar em consideração que o IMC por conta própria não é o suficiente para caracterizar uma pessoa como obesa ou definir algo quanto à sua saúde, já que o calculo não leva em consideração sua idade, gênero, percentual de gordura ou a prática de atividades físicas. Se você desejar uma avaliação mais completa do seu corpo, procure um profissional capacitado.</p>
       </div>
+
       <div>
-        <label v-if="mensagem">{{ mensagem }}</label>
-        <br>
-        <label v-if="aviso">{{ aviso }}</label>
+        <button type="submit" class="botao_calcular">Calcular</button>
+      </div>
+
+      <div>
+        <label class="resultado" v-if="mensagem">{{ mensagem }}</label>
         <br>
         <img :src= imagem :class="{ 'imagem-redimensionada': imagem }"  v-if="imagem">
       </div>
+
     </form>
+
   </div>
 </template>
 
@@ -35,47 +55,74 @@ export default defineComponent({
       altura: null as number | null,
       imc: null as number | null,
       mensagem: "" as string,
-      aviso: "" as string,
       imagem:"" ,
+      modoNoturno: false
     };
   },
+
+  mounted() {
+    const preferenciaModo = localStorage.getItem("modoNoturno");
+    if (preferenciaModo) {
+      this.modoNoturno = JSON.parse(preferenciaModo);
+      if (this.modoNoturno) {
+        document.documentElement.classList.add("noturno");
+      }
+    }
+  },
+
+  computed: {
+    imagemDiurna() {
+      return require('@/assets/dark_mode.png');
+    },
+    imagemNoturna() {
+      return require('@/assets/light_mode.png');
+    }
+  },
+
   methods: {
     calcular() {
       if (this.peso !== null && this.altura !== null) {
+
         const peso = parseFloat(this.peso.toString());
+
         const altura = parseFloat(this.altura.toString());
+
         const imc = peso / (altura * altura);
+        
         this.imc = parseFloat(imc.toFixed(2));
-        this.aviso = `É importante levar em consideração que o peso 
-          não necessariamente significa que a pessoa é obesa. 
-          Ou seja, depende da composição corporal.`
+
         if (imc < 18.5 ) {
           this.mensagem = `Possui um IMC de ${this.imc}: Abaixo do Peso.`;
-          this.imagem = require('@/assets/abaixo do peso.jpg');
-        } else if (imc >= 18.6 && imc <= 24.9) {
-          this.mensagem = `Possui um IMC de ${this.imc}:peso normal.`;
-          this.imagem = require('@/assets/peso normal.jpg');
+          this.imagem = require('@/assets/abaixo_do_peso.png');
+        } 
+        
+        else if (imc > 18.5 && imc < 25) {
+          this.mensagem = `Você possui um IMC de ${this.imc}: Peso Normal.`;
+          this.imagem = require('@/assets/peso_normal.png');
         }
-          else if (imc >= 25 && imc <= 29.9) {
-          this.mensagem = `Possui um IMC de ${this.imc}: Levemente acima do Peso.`;
-          this.imagem = require('@/assets/levemente acima do peso.jpg');
-        } else if (imc >= 30 && imc <= 34.9) {
-          this.mensagem = `Possui um IMC de ${this.imc}: Obesidade grau I.`;
-          this.imagem = require('@/assets/obesidade grau 1.jpg');
-        } else if (imc >= 35 && imc <= 39.9) {
-          this.mensagem = `Possui um IMC de ${this.imc}: Obesidade grau II.`;
-          this.imagem = require('@/assets/obesidade grau 2.jpg');
-        } else if (imc >= 40) {
-          this.mensagem = `Possui um IMC de ${this.imc}: Obesidade grau III.`;
-          this.imagem = require('@/assets/obesidade grau 3.jpg');
+
+        else if (imc >= 25 && imc < 30) {
+          this.mensagem = `Você possui um IMC de ${this.imc}: Acima do Peso.`;
+          this.imagem = require('@/assets/acima_do_peso.png');
+        } 
+        
+        else if (imc >= 30 && imc < 40) {
+          this.mensagem = `Você possui um IMC de ${this.imc}: Obesidade Grau I/II.`;
+          this.imagem = require('@/assets/obesidade_grau_1.png');
+        } 
+        
+        else if (imc >= 40) {
+          this.mensagem = `Você possui um IMC de ${this.imc}: Obesidade Grau III.`;
+          this.imagem = require('@/assets/obesidade_grau_3.png');
         }
       }
     },
+
+    ligarModoNoturno() {
+      this.modoNoturno = !this.modoNoturno;
+      document.documentElement.classList.toggle("noturno", this.modoNoturno);
+      localStorage.setItem("modoNoturno", JSON.stringify(this.modoNoturno));
+    }
   }
 });
 </script>
-<style>
-.imagem-redimensionada {
-  max-width: 400px;
-  max-height: 400px;
-}</style>
